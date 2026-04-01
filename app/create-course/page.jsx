@@ -7,7 +7,7 @@ import TopicDescription from './_components/TopicDescription';
 import SelectOption from './_components/SelectOption';
 import { useContext } from 'react';
 import { UserInputContext } from '../_context/UserInputContext';
-import { GenerateCourseLayout_AI } from '@/configs/AiModel';
+import { GenerateCourseLayout_AI, normalizeCourseOutput } from '@/configs/AiModel'; // ✅ UPDATED
 import LoadingDialog from './_components/LoadingDialog';
 import { db } from '@/configs/db';
 import { CourseList } from '@/configs/schema';
@@ -77,15 +77,20 @@ const GenerateCourseLayout=async()=>{
     const USER_INPUT_PROMPT='Category:'+userCourseInput?.category+',Topic:'+userCourseInput?.topic+',Level:'+userCourseInput?.level+','+userCourseInput?.duration+',NoOf Chapters:'+userCourseInput?.noOfChapters+', in JSON format'
     const FINAL_PROMOT=BASIC_PROMPT+USER_INPUT_PROMPT;
     console.log(FINAL_PROMOT);
+
     const result = await GenerateCourseLayout_AI(FINAL_PROMOT);
-       
     console.log(result);
 
-// If response is JSON string:
+    // Clean JSON
     const cleaned = result.replace(/```json|```/g, "");
     const parsed = JSON.parse(cleaned);
-    console.log(parsed);
-    SaveCourseLayoutInDb(parsed);
+
+    // 🔥 NEW: Normalize AI output (VERY IMPORTANT)
+    const normalized = normalizeCourseOutput(parsed);
+
+    console.log("Normalized:", normalized);
+
+    SaveCourseLayoutInDb(normalized); // ✅ use normalized instead of parsed
     
 }catch (error) {
         console.error("ERROR:", error);
