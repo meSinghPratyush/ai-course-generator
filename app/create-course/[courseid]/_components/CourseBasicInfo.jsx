@@ -2,19 +2,20 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image'
 import React from 'react'
 import { MdHealthAndSafety } from "react-icons/md";
+import EditCourseBasicInfo from './EditCourseBasicInfo';
 
-function CourseBasicInfo({course}) {
+function CourseBasicInfo({course,refreshData}) {
   return (
     <div className='p-10 border rounded-xl shadow-sm mt-5'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
             <div>
 
-                {/* 🔥 Use AI standardized course name */}
+                {/* Use AI standardized course name */}
                 <h2 className='font-bold text-3xl'>
-                  {course?.courseOutput?.course_name || course?.name}
+                  {course?.courseOutput?.course_name || course?.name} <EditCourseBasicInfo course={course} refreshData={()=>refreshData(true)} /> 
                 </h2>
 
-                {/* ✅ Already correct */}
+                {/* Already correct */}
                 <h2 className='text-sm text-gray-400 mt-3'>
                   {course?.courseOutput?.description}
                 </h2>
