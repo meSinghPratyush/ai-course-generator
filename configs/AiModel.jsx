@@ -4,7 +4,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
 });
 
-// 🔥 AI Call Function
+//  AI Call Function
 export const GenerateCourseLayout_AI = async (prompt) => {
   const finalPrompt = `
 Generate a course in STRICT JSON format.
@@ -50,7 +50,7 @@ ${prompt}
   return response.text;
 };
 
-// 🔥 Normalizer (NEW)
+// Normalizer (NEW)
 export const normalizeCourseOutput = (data) => {
   return {
     course_name: data.course_name || data["Course Name"] || "",
@@ -68,4 +68,37 @@ export const normalizeCourseOutput = (data) => {
         ch.duration || ch["Duration"] || "1 hour",
     })),
   };
+};
+
+//  Chapter Content Generator
+export const GenerateChapterContent_AI = async (prompt) => {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: prompt }],
+      },
+    ],
+  });
+
+  const raw = response.text;
+  let cleaned = raw.replace(/```json|```/g, "").trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.warn("JSON parse failed, retrying with stricter prompt...");
+    const retryResponse = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt + "\n\nCRITICAL: Return ONLY valid JSON. Escape all special characters inside string values properly." }],
+        },
+      ],
+    });
+    const retryRaw = retryResponse.text.replace(/```json|```/g, "").trim();
+    return JSON.parse(retryRaw);
+  }
 };
