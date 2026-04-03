@@ -1,10 +1,18 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 import { MdHealthAndSafety } from "react-icons/md";
 import EditCourseBasicInfo from './EditCourseBasicInfo';
 
 function CourseBasicInfo({course,refreshData}) {
+  const [selectedFile, setSelectedFile] = useState();
+  const onFileSelected = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(URL.createObjectURL(file));
+    const fileName=Date.now()+'.jpg';
+    const storageRef=ref(storage,fileName);
+  }
+  
   return (
     <div className='p-10 border rounded-xl shadow-sm mt-5'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
@@ -28,13 +36,16 @@ function CourseBasicInfo({course,refreshData}) {
             </div>
 
             <div>
-                <Image 
-                  src={'/online-lesson.png'} 
-                  width={100} 
-                  height={100} 
-                  className='w-full rounded-xl h-[250px]' 
-                  alt='lesson'
-                />
+                <label htmlFor='upload-image'>
+                  <Image 
+                    src={selectedFile?selectedFile:'/online-lesson.png'} 
+                    width={300} 
+                    height={300} 
+                    alt='lesson'
+                    className="w-full rounded-xl h-[250px] cursor-pointer  object-contain" 
+                  />
+                  <input type="file" id="upload-image" className='opacity-0' onChange={onFileSelected}/>
+                </label>
             </div>
         </div>
     </div>
