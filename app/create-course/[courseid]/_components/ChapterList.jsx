@@ -3,7 +3,7 @@ import { HiOutlineClock } from "react-icons/hi2";
 import { HiOutlineCheckBadge } from "react-icons/hi2";
 import EditChapters from './EditChapters';
 
-function ChapterList({course,refreshData}) {
+function ChapterList({course,refreshData,edit=true}) {
     const [expanded, setExpanded] = useState(null);
 
     const chapters = course?.courseOutput?.chapters || []; // safe fallback
@@ -26,7 +26,7 @@ function ChapterList({course,refreshData}) {
 
                             <div>
                                 <h2 className='font-medium text-lg'>
-                                    {chapter.chapter_name} <EditChapters course={course} index={index} refreshData={()=>refreshData(true)} />
+                                    {chapter.chapter_name} {edit&& <EditChapters course={course} index={index} refreshData={()=>refreshData(true)} />}
                                 </h2>
 
                                 <p className='text-sm text-gray-500'>

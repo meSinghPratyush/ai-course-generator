@@ -1,5 +1,5 @@
 "use client"
-import React, { use } from 'react'
+import React, { use, useContext } from 'react'
 import Image from 'next/image'
 import { HiOutlineHome,HiCubeTransparent,HiCloudArrowUp,HiMiniArrowLeftEndOnRectangle } from "react-icons/hi2";
 import { GrUpgrade } from "react-icons/gr";
@@ -8,7 +8,10 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Progress } from '@/components/ui/progress';
 
+import { UserCourseListContext } from '@/app/_context/UserCourseListContext';
+
 function SideBar() {
+  const {userCourseList,setUserCourseList}=useContext(UserCourseListContext);
   const Menu=[
     {
       id:1,
@@ -57,8 +60,8 @@ function SideBar() {
           ))}
         </ul>
         <div className='absolute bottom-10 w-[80%]'>
-          <Progress value={33} />
-          <h2 className='text-sm my-2'>3 Out of 5 Course created</h2>
+          <Progress value={(userCourseList?.length/5)*100} />
+          <h2 className='text-sm my-2'>{userCourseList?.length} Out of 5 Course created</h2>
           <h2 className='text-xs text-gray-500'>Upgrade for unlimited course creation.</h2>
         </div>
     </div>

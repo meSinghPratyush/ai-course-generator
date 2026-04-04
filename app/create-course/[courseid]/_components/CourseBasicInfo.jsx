@@ -6,7 +6,7 @@ import { db } from '@/configs/db';
 import { CourseList } from '@/configs/schema';
 import { eq } from 'drizzle-orm';
 
-function CourseBasicInfo({course, refreshData}) {
+function CourseBasicInfo({course, refreshData,edit=true}) {
   const [selectedFile, setSelectedFile] = useState();
 
   const onFileSelected = async (event) => {
@@ -42,7 +42,7 @@ function CourseBasicInfo({course, refreshData}) {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
             <div>
                 <h2 className='font-bold text-3xl'>
-                  {course?.courseOutput?.course_name || course?.name} <EditCourseBasicInfo course={course} refreshData={()=>refreshData(true)} /> 
+                  {course?.courseOutput?.course_name || course?.name} {edit&& <EditCourseBasicInfo course={course} refreshData={()=>refreshData(true)} />} 
                 </h2>
                 <h2 className='text-sm text-gray-400 mt-3'>
                   {course?.courseOutput?.description}
@@ -60,7 +60,7 @@ function CourseBasicInfo({course, refreshData}) {
                     alt='lesson'
                     className="w-full rounded-xl h-[250px] cursor-pointer object-cover" 
                   />
-                  <input type="file" id="upload-image" className='opacity-0' onChange={onFileSelected}/>
+                  {edit && <input type="file" id="upload-image" className='opacity-0' onChange={onFileSelected}/>}
                 </label>
             </div>
         </div>

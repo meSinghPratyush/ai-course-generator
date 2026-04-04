@@ -13,6 +13,7 @@ import LoadingDialog from '../_components/LoadingDialog';
 import { GenerateChapterContent_AI } from '@/configs/AiModel';
 import service from '@/configs/service';
 
+
 function CourseLayout() {
   const {user}=useUser();
    const params = useParams();
