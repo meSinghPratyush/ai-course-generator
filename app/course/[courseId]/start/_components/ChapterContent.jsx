@@ -1,6 +1,11 @@
 import React from 'react'
 import YouTube from 'react-youtube'
 import ReactMarkdown from 'react-markdown'
+import { Button } from '@/components/ui/button'
+import QuizCard from './QuizCard'
+import { db } from '@/configs/db'
+import { UserQuizResult } from '@/configs/schema'
+import { and, eq } from 'drizzle-orm'
 
  const opts = {
       height: '390',
@@ -10,9 +15,31 @@ import ReactMarkdown from 'react-markdown'
       },
     };
 
-function ChapterContent({chapter,content}) {
+function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
 
-    
+    const [showQuiz, setShowQuiz] = React.useState(false);
+    const [lastResult, setLastResult] = React.useState(null);
+
+    React.useEffect(()=>{
+        if(content?.chapterIndex !== undefined && userEmail && courseId){
+            GetLastResult();
+        }
+    },[content?.chapterIndex, userEmail, courseId])
+
+    const GetLastResult=async()=>{
+        const result=await db.select().from(UserQuizResult)
+            .where(and(
+                eq(UserQuizResult.courseId, courseId),
+                eq(UserQuizResult.chapterIndex, content?.chapterIndex),
+                eq(UserQuizResult.userEmail, userEmail)
+            ));
+        if(result?.length > 0){
+            setLastResult(result[0]);
+        } else {
+            setLastResult(null);
+        }
+    }
+
   return (
     <div className='p-10 overflow-hidden'>
         <h2 className='font-medium text-2xl'>
@@ -27,19 +54,47 @@ function ChapterContent({chapter,content}) {
             />
         </div>
         {/** Content.... */}
-
         <div>
             <h2 className='text-xl font-medium mt-5'>{content?.content?.title}</h2>
             <div className='prose max-w-none mt-3'>
                 <ReactMarkdown>{content?.content?.description}</ReactMarkdown>
             </div>
             {content?.content?.codeExample && 
-                <div className='bg-gray-900 text-white p-5 rounded-lg mt-5 overflow-x-auto'>
+                <div className='bg-gray-900 text-white p-5 rounded-lg mt-5 overflow-x-auto code-example'>
                     <h2 className='text-lg font-medium mb-3'>Code Examples and Syntax for Refrence</h2>
                     <div className='whitespace-pre-wrap break-words' dangerouslySetInnerHTML={{__html: content?.content?.codeExample}} />
                 </div>
             }
         </div>
+
+        {/** Quiz Button */}
+        {content?.content?.quiz &&
+            <div className='mt-10'>
+                {/* Show last result if exists */}
+                {lastResult && !showQuiz &&
+                    <div className={`p-4 rounded-xl mb-4 text-center ${lastResult?.passed ? 'bg-green-50' : 'bg-red-50'}`}>
+                        <h2 className='font-medium'>Last Quiz Result: <span className='font-bold'>{lastResult?.score}%</span></h2>
+                        <p className={`text-sm mt-1 ${lastResult?.passed ? 'text-green-600' : 'text-red-600'}`}>
+                            {lastResult?.passed ? '✅ Passed' : '❌ Not Passed'}
+                        </p>
+                    </div>
+                }
+                {!showQuiz ?
+                    <Button onClick={()=>setShowQuiz(true)} className='w-full'>
+                        {lastResult ? 'Retake Quiz' : 'Take Chapter Quiz'}
+                    </Button>
+                :
+                    <QuizCard
+                        quiz={content?.content?.quiz}
+                        chapterIndex={content?.chapterIndex}
+                        courseId={courseId}
+                        userEmail={userEmail}
+                        onQuizPass={onQuizPass}
+                        onClose={()=>{setShowQuiz(false); GetLastResult();}}
+                    />
+                }
+            </div>
+        }
     </div>
   )
 }

@@ -22,3 +22,12 @@ export const ChapterContent=pgTable('chapterContent',{
     content:json('content').notNull(),
     videoId:varchar('videoId').default('')
 })
+
+export const UserQuizResult = pgTable('userQuizResult', {
+    id: serial('id').primaryKey(),
+    courseId: varchar('courseId').notNull(),
+    chapterIndex: integer('chapterIndex').notNull(),
+    userEmail: varchar('userEmail').notNull(),
+    score: integer('score').notNull(),
+    passed: boolean('passed').notNull().default(false)
+})
