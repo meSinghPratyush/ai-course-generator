@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect } from 'react'
-import { CourseList, ChapterContent } from '@/configs/schema';
+import { CourseList, ChapterContent, User } from '@/configs/schema';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/configs/db';
 import { useUser } from '@clerk/nextjs';
@@ -94,6 +94,12 @@ function CourseLayout() {
 
           if(isLastChapter){
             await db.update(CourseList).set({ publish: true }).where(eq(CourseList.courseId, course?.courseId));
+
+            // Deduct 1 credit from user
+            const userResult = await db.select().from(User).where(eq(User.email, user?.primaryEmailAddress?.emailAddress));
+            const currentCredits = userResult[0]?.credits || 0;
+            await db.update(User).set({ credits: currentCredits - 1 }).where(eq(User.email, user?.primaryEmailAddress?.emailAddress));
+
             setLoading(false);
             router.replace('/create-course/'+course?.courseId+'/finish');
           }

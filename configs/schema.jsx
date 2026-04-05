@@ -31,3 +31,11 @@ export const UserQuizResult = pgTable('userQuizResult', {
     score: integer('score').notNull(),
     passed: boolean('passed').notNull().default(false)
 })
+
+export const User = pgTable('user', {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(),
+    email: varchar('email').notNull().unique(),
+    imageUrl: varchar('imageUrl'),
+    credits: integer('credits').notNull().default(5)
+})

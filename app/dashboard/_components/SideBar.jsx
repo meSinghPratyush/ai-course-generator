@@ -1,5 +1,5 @@
 "use client"
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { HiOutlineHome,HiCubeTransparent,HiCloudArrowUp,HiMiniArrowLeftEndOnRectangle } from "react-icons/hi2";
 import { GrUpgrade } from "react-icons/gr";
@@ -8,7 +8,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Progress } from '@/components/ui/progress';
 import { UserCourseListContext } from '@/app/_context/UserCourseListContext';
-import { useClerk } from '@clerk/nextjs';
+import { useClerk, useUser } from '@clerk/nextjs';
+import { db } from '@/configs/db';
+import { User } from '@/configs/schema';
+import { eq } from 'drizzle-orm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,8 +26,19 @@ import {
 function SideBar() {
   const {userCourseList,setUserCourseList}=useContext(UserCourseListContext);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [userCredits, setUserCredits] = useState(0);
   const { signOut } = useClerk();
+  const { user } = useUser();
   const router = useRouter();
+
+  useEffect(()=>{
+    if(user) GetUserCredits();
+  },[user])
+
+  const GetUserCredits = async () => {
+    const result = await db.select().from(User).where(eq(User.email, user?.primaryEmailAddress?.emailAddress));
+    setUserCredits(result[0]?.credits || 0);
+  }
 
   const Menu=[
     {
@@ -86,9 +100,14 @@ function SideBar() {
         </ul>
 
         <div className='absolute bottom-10 w-[80%]'>
-          <Progress value={(userCourseList?.length/5)*100} />
-          <h2 className='text-sm my-2'>{userCourseList?.length} Out of 5 Course created</h2>
-          <h2 className='text-xs text-gray-500'>Upgrade for unlimited course creation.</h2>
+          <div className='bg-purple-50 p-3 rounded-lg'>
+            <h2 className='text-sm font-medium'>⚡ Credits Remaining</h2>
+            <h2 className='text-2xl font-bold text-primary mt-1'>{userCredits}</h2>
+            <Progress value={(userCredits/15)*100} className='mt-2'/>
+            <Link href={'/dashboard/upgrade'}>
+              <h2 className='text-xs text-gray-500 mt-2 cursor-pointer hover:text-primary'>Buy more credits →</h2>
+            </Link>
+          </div>
         </div>
 
         <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
