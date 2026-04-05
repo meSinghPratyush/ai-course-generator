@@ -1,0 +1,74 @@
+import { Button } from '@/components/ui/button';
+import React, { useState } from 'react'
+import { MdHealthAndSafety } from "react-icons/md";
+import EditCourseBasicInfo from './EditCourseBasicInfo';
+import { db } from '@/configs/db';
+import { CourseList } from '@/configs/schema';
+import { eq } from 'drizzle-orm';
+import Link from 'next/link';
+
+function CourseBasicInfo({course, refreshData,edit=true}) {
+  const [selectedFile, setSelectedFile] = useState();
+
+  const onFileSelected = async (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(URL.createObjectURL(file));
+
+    // Upload to Cloudinary
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'ai-course-generator');
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+    console.log('Cloudinary URL:', data.secure_url);
+
+    // Save URL to DB
+    await db.update(CourseList)
+      .set({ courseBanner: data.secure_url })
+      .where(eq(CourseList.courseId, course?.courseId));
+
+    refreshData(true);
+  }
+  
+  return (
+    <div className='p-10 border rounded-xl shadow-sm mt-5'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+            <div>
+                <h2 className='font-bold text-3xl'>
+                  {course?.courseOutput?.course_name || course?.name} {edit&& <EditCourseBasicInfo course={course} refreshData={()=>refreshData(true)} />} 
+                </h2>
+                <h2 className='text-sm text-gray-400 mt-3'>
+                  {course?.courseOutput?.description}
+                </h2>
+                <h2 className='font-medium text-md mt-2 flex gap-2 items-center text-primary'>
+                  <MdHealthAndSafety />{course?.category}
+                </h2>
+                {!edit && <Link href={'/course/'+course?.courseId+'/start'}>
+                  <Button className="w-full cursor-pointer">Start</Button>
+                </Link>}
+            </div>
+
+            <div className='overflow-hidden rounded-xl'>
+                <label htmlFor='upload-image'>
+                  <img 
+                    src={selectedFile ? selectedFile : (course?.courseBanner || '/online-lesson.png')} 
+                    alt='lesson'
+                    className="w-full rounded-xl h-[250px] cursor-pointer object-cover" 
+                  />
+                  {edit && <input type="file" id="upload-image" className='opacity-0' onChange={onFileSelected}/>}
+                </label>
+            </div>
+        </div>
+    </div>
+  )
+}
+
+export default CourseBasicInfo
