@@ -5,6 +5,7 @@ import EditCourseBasicInfo from './EditCourseBasicInfo';
 import { db } from '@/configs/db';
 import { CourseList } from '@/configs/schema';
 import { eq } from 'drizzle-orm';
+import Link from 'next/link';
 
 function CourseBasicInfo({course, refreshData,edit=true}) {
   const [selectedFile, setSelectedFile] = useState();
@@ -50,7 +51,9 @@ function CourseBasicInfo({course, refreshData,edit=true}) {
                 <h2 className='font-medium text-md mt-2 flex gap-2 items-center text-primary'>
                   <MdHealthAndSafety />{course?.category}
                 </h2>
-                <Button className="w-full">Start</Button>
+                {!edit && <Link href={'/course/'+course?.courseId+'/start'}>
+                  <Button className="w-full cursor-pointer">Start</Button>
+                </Link>}
             </div>
 
             <div className='overflow-hidden rounded-xl'>
