@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import React, { useState } from 'react'
 import { MdHealthAndSafety } from "react-icons/md";
-import EditCourseBasicInfo from './EditCourseBasicInfo';
+import EditCourseBasicInfo from '@/app/create-course/[courseId]/_components/EditCourseBasicInfo'
 import { db } from '@/configs/db';
 import { CourseList } from '@/configs/schema';
 import { eq } from 'drizzle-orm';

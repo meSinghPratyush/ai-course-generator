@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HiOutlineClock } from "react-icons/hi2";
 import { HiOutlineCheckBadge } from "react-icons/hi2";
-import EditChapters from './EditChapters';
+import EditChapters from '@/app/create-course/[courseId]/_components/EditChapters'
 
 function ChapterList({course,refreshData,edit=true}) {
     const [expanded, setExpanded] = useState(null);
