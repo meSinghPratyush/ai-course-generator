@@ -46,6 +46,7 @@ function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
             {chapter?.chapter_name}
         </h2>
         <p className='text-gray-500'>{chapter?.about}</p>
+
         {/** Video.... */}
         <div className='flex justify-center my-6'>
             <YouTube
@@ -53,18 +54,27 @@ function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
                 opts={opts}
             />
         </div>
+
         {/** Content.... */}
         <div>
             <h2 className='text-xl font-medium mt-5'>{content?.content?.title}</h2>
-            <div className='prose max-w-none mt-3'>
-                <ReactMarkdown>{content?.content?.description}</ReactMarkdown>
-            </div>
-            {content?.content?.codeExample && 
-                <div className='bg-gray-900 text-white p-5 rounded-lg mt-5 overflow-x-auto code-example'>
-                    <h2 className='text-lg font-medium mb-3'>Code Examples and Syntax for Refrence</h2>
-                    <div className='whitespace-pre-wrap break-words' dangerouslySetInnerHTML={{__html: content?.content?.codeExample}} />
+
+            {/* Sections — concept + explanation + code per section */}
+            {content?.content?.sections?.map((section, index) => (
+                <div key={index} className='mt-8'>
+                    <h3 className='text-lg font-semibold text-primary'>{section?.concept}</h3>
+                    <div className='prose max-w-none mt-2'>
+                        <ReactMarkdown>{section?.explanation}</ReactMarkdown>
+                    </div>
+                    {section?.code &&
+                        <div className='bg-gray-900 text-white p-5 rounded-lg mt-3 overflow-x-auto'>
+                            <h2 className='text-lg font-medium mb-3'>Code Example</h2>
+                            <div className='whitespace-pre-wrap break-words'
+                                dangerouslySetInnerHTML={{__html: section?.code}} />
+                        </div>
+                    }
                 </div>
-            }
+            ))}
         </div>
 
         {/** Quiz Button */}

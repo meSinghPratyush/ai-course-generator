@@ -1,4 +1,3 @@
-
 import Image from 'next/image'
 import React from 'react'
 import { HiBookOpen } from "react-icons/hi2";
@@ -11,7 +10,7 @@ import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 
 
-function CourseCard({course,refreshData}) {
+function CourseCard({course,refreshData,displayUser=false}) {
 
     const handleOnDelete=async()=>{
         await db.delete(ChapterContent).where(eq(ChapterContent.courseId, course?.courseId))
@@ -22,24 +21,28 @@ function CourseCard({course,refreshData}) {
         }
     }
   return (
-
     <div className='shadow-md rounded-lg border p-2 hover:scale-105 transition-all cursor-pointer mt-4'>
         <Link href={'/course/'+course?.courseId}>
             <Image src={course?.courseBanner} width={300} height={200} alt={course?.name} className='w-full h-[200px] object-cover rounded-lg'/>
         </Link>
-        <div className='p-2 h-[100px] flex flex-col justify-between'>
+        <div className={`p-2 flex flex-col justify-between ${displayUser ? 'h-[130px]' : 'h-[100px]'}`}>
             <div className='flex justify-between items-center'>
                 <h2 className='font-medium text-lg line-clamp-1 flex-1' title={course?.courseOutput?.course_name}>{course?.courseOutput?.course_name}</h2>
-                
-                <DropdownOption
+                {!displayUser&&<DropdownOption
                 handleOnDelete={()=>handleOnDelete()}
-                ><HiDotsVertical className='flex-none ml-1'/></DropdownOption>
+                ><HiDotsVertical className='flex-none ml-1'/></DropdownOption>}
             </div>
             <p className='text-sm text-gray-400 my-1'>{course?.category}</p>
             <div className='flex items-center justify-between'>
                 <h2 className='flex gap-2 items-center p-1 bg-purple-50 text-primary text-sm'><HiBookOpen />{course?.courseOutput?.chapters?.length} Chapters</h2>
                 <h2 className='text-sm bg-purple-50 text-primary p-1 rounded-sm'>{course?.courseOutput?.level} Level</h2>
             </div>
+           {displayUser && 
+                <div className='flex items-center gap-2 mt-1'>
+                    <img src={course?.userProfileImage} width={25} height={25} alt={course?.userName} className='rounded-full'/>
+                    <p className='text-sm text-gray-500'>{course?.userName}</p>
+                </div>
+           }
         </div>
     </div>
   )

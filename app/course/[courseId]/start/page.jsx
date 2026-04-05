@@ -2,18 +2,19 @@
 import { db } from '@/configs/db'
 import { CourseList, UserQuizResult } from '@/configs/schema'
 import { and, eq } from 'drizzle-orm'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
 import ChapterListCard from './_components/ChapterListCard'
 import ChapterContent from './_components/ChapterContent'
 import { ChapterContent as ChapterContentSchema } from '@/configs/schema'
-import { HiLockClosed } from 'react-icons/hi2'
+import { HiLockClosed, HiArrowLeft } from 'react-icons/hi2'
 import { useUser } from '@clerk/nextjs'
 
 function CourseStart() {
     
     const params = useParams();
     const {user} = useUser();
+    const router = useRouter();
 
     const [course,setCourse]=React.useState();
     const [selectedChapter,setSelectedChapter]=React.useState();
@@ -58,9 +59,13 @@ function CourseStart() {
     <div>
         {/**Chapter List sidebar... */}
         <div className='md:w-64 hidden md:block h-screen border-r fixed top-0 left-0 shadow-sm overflow-y-auto'>
-            <h2 className='font-medium text-lg bg-primary p-4 text-white'>
-                {course?.courseOutput?.course_name || course?.name}
-            </h2>
+            <div className='flex items-center gap-2 bg-primary p-4'>
+                <HiArrowLeft className='text-white cursor-pointer flex-none' onClick={()=>router.replace('/dashboard')} />
+                <h2 className='font-medium text-lg text-white cursor-pointer line-clamp-1'
+                    onClick={()=>router.replace('/course/'+params?.courseId)}>
+                    {course?.courseOutput?.course_name || course?.name}
+                </h2>
+            </div>
             <div>
                 {course?.courseOutput?.chapters?.map((chapter,index)=>(
                     <div key={index} 

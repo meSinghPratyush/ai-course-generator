@@ -44,8 +44,10 @@ function CourseLayout() {
 
       const PROMPT = `Explain the concept in Detail on Topic: ${course?.name}, Chapter: ${chapter?.chapter_name} in JSON Format with the following fields:
           - title: chapter title
-          - description: detailed explanation of the chapter content
-          - codeExample: HTML Code format if applicable, else empty string
+          - sections: an array of sections, each section object should have:
+            - concept: the concept/topic name for this section
+            - explanation: detailed explanation of this concept in markdown format
+            - code: HTML code example for this concept if applicable, else empty string
           - quiz: an array of 5 multiple choice questions to test knowledge of this chapter, each question object should have:
             - question: the question text
             - options: array of 4 options
