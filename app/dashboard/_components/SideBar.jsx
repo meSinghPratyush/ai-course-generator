@@ -35,6 +35,23 @@ function SideBar() {
     if(user) GetUserCredits();
   },[user])
 
+  useEffect(()=>{
+    // Refetch credits whenever window gets focus
+    const handleFocus = () => {
+      if(user) GetUserCredits();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  },[user])
+
+  useEffect(()=>{
+    // Refetch credits every 5 seconds to catch real time updates
+    const interval = setInterval(()=>{
+      if(user) GetUserCredits();
+    }, 5000);
+    return () => clearInterval(interval);
+  },[user])
+
   const GetUserCredits = async () => {
     const result = await db.select().from(User).where(eq(User.email, user?.primaryEmailAddress?.emailAddress));
     setUserCredits(result[0]?.credits || 0);
@@ -101,11 +118,11 @@ function SideBar() {
 
         <div className='absolute bottom-10 w-[80%]'>
           <div className='bg-purple-50 p-3 rounded-lg'>
-            <h2 className='text-sm font-medium'>⚡ Credits Remaining</h2>
+            <h2 className='text-sm font-medium'>Credits Remaining</h2>
             <h2 className='text-2xl font-bold text-primary mt-1'>{userCredits}</h2>
             <Progress value={(userCredits/15)*100} className='mt-2'/>
             <Link href={'/dashboard/upgrade'}>
-              <h2 className='text-xs text-gray-500 mt-2 cursor-pointer hover:text-primary'>Buy more credits →</h2>
+              <h2 className='text-xs text-gray-500 mt-2 cursor-pointer hover:text-primary'>Buy more credits</h2>
             </Link>
           </div>
         </div>

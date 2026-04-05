@@ -1,6 +1,6 @@
 "use client"
 import { db } from '@/configs/db'
-import { CourseList, UserQuizResult } from '@/configs/schema'
+import { CourseList, UserQuizResult, CoursePurchase } from '@/configs/schema'
 import { and, eq } from 'drizzle-orm'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
@@ -20,6 +20,7 @@ function CourseStart() {
     const [selectedChapter,setSelectedChapter]=React.useState();
     const [chapterContent,setChapterContent]=React.useState();
     const [unlockedChapters,setUnlockedChapters]=React.useState([0]);
+    const [hasAccess,setHasAccess]=React.useState(false);
 
     useEffect(()=>{
         GetCourse();
@@ -28,12 +29,38 @@ function CourseStart() {
     useEffect(()=>{
         if(course && user){
             GetQuizResults();
+            CheckAccess();
         }
     },[course, user])
 
     const GetCourse=async()=>{
         const result=await db.select().from(CourseList).where(eq(CourseList?.courseId,params?.courseId));
         setCourse(result[0]);
+    }
+
+    const CheckAccess=async()=>{
+        const userEmail = user?.primaryEmailAddress?.emailAddress;
+
+        // Owner always has access
+        if(course?.createdBy === userEmail){
+            setHasAccess(true);
+            return;
+        }
+
+        // Check if user has purchased the course
+        const result = await db.select().from(CoursePurchase)
+            .where(and(
+                eq(CoursePurchase.courseId, params?.courseId),
+                eq(CoursePurchase.buyerEmail, userEmail)
+            ));
+
+        if(result.length === 0){
+            // No access --- redirect to course detail page
+            router.replace('/course/'+params?.courseId);
+            return;
+        }
+
+        setHasAccess(true);
     }
 
     const GetQuizResults=async()=>{
@@ -53,6 +80,11 @@ function CourseStart() {
 
     const onQuizPass=(chapterIndex)=>{
         setUnlockedChapters(prev=>[...new Set([...prev, chapterIndex+1])]);
+    }
+
+    // Block render until access is confirmed
+    if(!hasAccess && course){
+        return null;
     }
 
     return (
@@ -99,7 +131,7 @@ function CourseStart() {
                     
                     <h2 className='font-bold text-3xl text-primary'>{course?.courseOutput?.course_name}</h2>
                     <p className='text-gray-500 mt-3 text-lg'>{course?.courseOutput?.description}</p>
-                    <p className='mt-6 text-gray-400 border p-3 rounded-lg'>👈 Select a chapter from the left panel to start learning</p>
+                    <p className='mt-6 text-gray-400 border p-3 rounded-lg'>Select a chapter from the left panel to start learning</p>
                 </div>
             :
                 <ChapterContent 
