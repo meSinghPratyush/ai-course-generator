@@ -66,7 +66,7 @@ function Course() {
               </div>
             :
               <>
-                <CourseBasicInfo course={course} edit={false} />
+                <CourseBasicInfo course={course} edit={course?.createdBy === user?.primaryEmailAddress?.emailAddress} refreshData={()=>GetCourse()} showStart={true} />
                 <CourseDetail course={course}/>
                 <ChapterList course={course} edit={false}/>
 

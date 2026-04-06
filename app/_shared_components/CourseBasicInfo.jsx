@@ -7,14 +7,13 @@ import { CourseList } from '@/configs/schema';
 import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 
-function CourseBasicInfo({course, refreshData,edit=true}) {
+function CourseBasicInfo({course, refreshData, edit=true, showStart=false}) {
   const [selectedFile, setSelectedFile] = useState();
 
   const onFileSelected = async (event) => {
     const file = event.target.files[0];
     setSelectedFile(URL.createObjectURL(file));
 
-    // Upload to Cloudinary
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', 'ai-course-generator');
@@ -30,7 +29,6 @@ function CourseBasicInfo({course, refreshData,edit=true}) {
     const data = await res.json();
     console.log('Cloudinary URL:', data.secure_url);
 
-    // Save URL to DB
     await db.update(CourseList)
       .set({ courseBanner: data.secure_url })
       .where(eq(CourseList.courseId, course?.courseId));
@@ -51,7 +49,7 @@ function CourseBasicInfo({course, refreshData,edit=true}) {
                 <h2 className='font-medium text-md mt-2 flex gap-2 items-center text-primary'>
                   <MdHealthAndSafety />{course?.category}
                 </h2>
-                {!edit && <Link href={'/course/'+course?.courseId+'/start'}>
+                {(!edit || showStart) && <Link href={'/course/'+course?.courseId+'/start'}>
                   <Button className="w-full cursor-pointer">Start</Button>
                 </Link>}
             </div>
