@@ -1,11 +1,8 @@
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -17,49 +14,50 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
 import React from 'react'
 import { HiTrash } from "react-icons/hi";
 
-
 function DropdownOption({children, handleOnDelete}) {
+    const [openAlert, setOpenAlert] = React.useState(false);
 
-    const [openAlert,setOpenAlert]=React.useState(false);
-    const OnDeleteClick=()=>{
-
-    }
   return (
     <div>
         <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-        <Button variant="outline">{children}</Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-        <DropdownMenuGroup>
-        <DropdownMenuLabel onClick={()=>setOpenAlert(true)}>
-            <div className="flex items-center gap-1"><HiTrash />Delete</div>
-        </DropdownMenuLabel>
-        </DropdownMenuGroup>
-    </DropdownMenuContent>
-    </DropdownMenu>
-    <AlertDialog open={openAlert}>
- 
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-      <AlertDialogDescription>
-        This action cannot be undone. This will permanently delete your account
-        from our servers.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel onClick={()=>setOpenAlert(false)}>Cancel</AlertDialogCancel>
-      <AlertDialogAction onClick={()=>{handleOnDelete();setOpenAlert(false)}}>Continue</AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+            <DropdownMenuTrigger asChild>
+                <div className="cursor-pointer">{children}</div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuGroup>
+                    <DropdownMenuItem
+                        className="flex items-center gap-1 text-red-500 cursor-pointer focus:text-red-500"
+                        onClick={()=>setOpenAlert(true)}
+                    >
+                        <HiTrash />Delete
+                    </DropdownMenuItem>
+                </DropdownMenuGroup>
+            </DropdownMenuContent>
+        </DropdownMenu>
+
+        <AlertDialog open={openAlert}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete this course from our servers.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={()=>setOpenAlert(false)}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        className="bg-red-500 hover:bg-red-600"
+                        onClick={()=>{handleOnDelete();setOpenAlert(false)}}
+                    >
+                        Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </div>
   )
 }
