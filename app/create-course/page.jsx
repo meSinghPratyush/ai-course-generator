@@ -148,7 +148,7 @@ const SaveCourseLayoutInDb=async(courseLayout)=>{
                 </div>
             </div>
         </div>
-        <div className='px-10 md:px-20 lg:px-44 mt-10'>                
+        <div className='px-5 md:px-20 lg:px-44 mt-10'>                
             {/* Component */}
 
                     {activeIndex==0?<SelectCategory />:

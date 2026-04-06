@@ -6,15 +6,11 @@ import { UserInputContext } from '../_context/UserInputContext'
 function CreateCourseLayout({ children }) {
     const [userCourseInput,setUserCourseInput]=useState({});
     return (
-
-    <div>
+    <div className='overflow-x-hidden'>
         <UserInputContext.Provider value={{userCourseInput,setUserCourseInput}}>
-           
             <Header />
             {children}
-           
         </UserInputContext.Provider>
-        
     </div>
   )
 }

@@ -103,7 +103,7 @@ function Explore() {
     <div>
       <h2 className='font-bold text-3xl'>Explore More Projects</h2>
       <p>Explore more projects build with AI by other users.</p>
-      <div className='grid grid-cols-2 lg:grid-cols-3 gap-5 mt-5'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5'>
         {courseList?.map((course, index)=>(
           <div key={index} className='relative'>
             <CourseCard course={course} displayUser={true}/>
