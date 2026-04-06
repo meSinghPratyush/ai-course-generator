@@ -43,6 +43,17 @@ function Upgrade() {
         if (user) GetUserCredits();
     }, [user])
 
+    // Load Razorpay script on mount
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            document.body.removeChild(script);
+        }
+    }, [])
+
     const GetUserCredits = async () => {
         const result = await db.select().from(User).where(eq(User.email, user?.primaryEmailAddress?.emailAddress));
         setUserCredits(result[0]?.credits);
@@ -83,7 +94,7 @@ function Upgrade() {
                     const data = await verifyRes.json();
                     if (data.success) {
                         setUserCredits(data.newCredits);
-                        alert(`🎉 Payment successful! ${plan.credits} credits added to your account.`);
+                        alert(`Payment successful! ${plan.credits} credits added to your account.`);
                     }
                 },
                 prefill: {
@@ -153,9 +164,6 @@ function Upgrade() {
                     </div>
                 ))}
             </div>
-
-            {/* Load Razorpay script */}
-            <script src="https://checkout.razorpay.com/v1/checkout.js" />
         </div>
     )
 }

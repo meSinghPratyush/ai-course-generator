@@ -57,7 +57,7 @@ function Course() {
   return (
     <div>
         <Header/>
-        <div className='px-10 p-10 md:px-20 lg:px-44'>
+        <div className='px-5 py-5 md:px-20 lg:px-44'>
             {loading ?
               <div className='animate-pulse'>
                 <div className='bg-slate-200 rounded-lg h-[300px] w-full'></div>
@@ -72,7 +72,7 @@ function Course() {
 
                 {/* Access gate --- show start button only if user has access */}
                 {!hasAccess &&
-                  <div className='p-10 border rounded-xl mt-5 text-center'>
+                  <div className='p-5 md:p-10 border rounded-xl mt-5 text-center'>
                     <h2 className='font-bold text-xl'>Purchase this course to access all chapters</h2>
                     <p className='text-gray-500 mt-2'>This course costs 1 credit to unlock</p>
                     <Button className='mt-5' onClick={()=>router.replace('/dashboard/explore')}>

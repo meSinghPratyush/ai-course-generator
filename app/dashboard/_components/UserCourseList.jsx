@@ -46,7 +46,7 @@ function UserCourseList() {
   return (
     <div className='mt-10'>
       <h2 className='font-medium text-xl'>My Courses</h2>
-      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 mt-3'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 mt-3'>
         {courseList?.length>0 ? courseList?.map((course,index)=>(
           <CourseCard course={course} key={index} refreshData={()=>getUserCourses()} />
         ))

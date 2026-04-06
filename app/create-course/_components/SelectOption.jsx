@@ -9,18 +9,18 @@ import {
 } from "@/components/ui/select"
 import { Input } from '@/components/ui/input'
 import { UserInputContext } from '@/app/_context/UserInputContext';
-function SelectOption() {
 
+function SelectOption() {
   const {userCourseInput,setUserCourseInput}=useContext(UserInputContext);
-    const handleInputChange=(fieldName,value)=>{
-         setUserCourseInput(prev=>({
-          ...prev,
-          [fieldName]:value
-         }))
-    }
+  const handleInputChange=(fieldName,value)=>{
+    setUserCourseInput(prev=>({
+      ...prev,
+      [fieldName]:value
+    }))
+  }
   return (
-    <div className='px-20 md:px-20 lg:px-44'>
-        <div className='grid grid-cols-2 gap-10'>
+    <div>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-5'>
             <div>
                 <label className='text-sm'>Difficulty Level</label>
                 <Select onValueChange={(value)=>handleInputChange('level',value)}

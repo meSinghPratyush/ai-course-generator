@@ -7,14 +7,6 @@ import { db } from '@/configs/db'
 import { UserQuizResult } from '@/configs/schema'
 import { and, eq } from 'drizzle-orm'
 
- const opts = {
-      height: '390',
-      width: '640',
-      playerVars: {
-        autoplay: 0,
-      },
-    };
-
 function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
 
     const [showQuiz, setShowQuiz] = React.useState(false);
@@ -41,17 +33,23 @@ function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
     }
 
   return (
-    <div className='p-10 overflow-hidden'>
-        <h2 className='font-medium text-2xl'>
+    <div className='p-5 md:p-10 overflow-hidden'>
+        <h2 className='font-medium text-xl md:text-2xl'>
             {chapter?.chapter_name}
         </h2>
         <p className='text-gray-500'>{chapter?.about}</p>
 
         {/** Video.... */}
-        <div className='flex justify-center my-6'>
+        <div className='my-6 rounded-xl overflow-hidden w-full max-w-2xl mx-auto aspect-video'>
             <YouTube
                 videoId={content?.videoId}
-                opts={opts}
+                opts={{
+                    width: '100%',
+                    height: '100%',
+                    playerVars: { autoplay: 0 },
+                }}
+                className='w-full h-full rounded-xl'
+                iframeClassName='w-full h-full rounded-xl'
             />
         </div>
 
