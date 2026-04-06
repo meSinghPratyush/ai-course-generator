@@ -17,22 +17,26 @@ import service from '@/configs/service';
 function CourseLayout() {
   const {user}=useUser();
    const params = useParams();
-   const [course,setCourse]=React.useState([]);
+   const [course,setCourse]=React.useState(null);
    const [loading,setLoading]=React.useState(false);
    const router=useRouter();
-  useEffect(()=>{
-    if(params?.courseId && user){
-      GetCourse();
-    }
-  },[params?.courseId,user]);
+
+useEffect(()=>{
   
-  const GetCourse=async()=>{
-    const result=await db.select().from(CourseList).
-    where(and(eq(CourseList.courseId,params?.courseId),
-    eq(CourseList?.createdBy,user?.primaryEmailAddress?.emailAddress)))
-    setCourse(result[0]);
-    console.log(result);
+  if(params?.courseId){
+    GetCourse();
   }
+},[params?.courseId]);
+  
+const GetCourse=async()=>{
+    
+    const result=await db.select().from(CourseList)
+    .where(eq(CourseList.courseId, params?.courseId));
+  
+    if(result?.length > 0){
+      setCourse(result[0]);
+    }
+}
 
   const GenerateChapterContent=()=>{
     setLoading(true);

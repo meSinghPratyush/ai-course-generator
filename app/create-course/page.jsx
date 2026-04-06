@@ -7,7 +7,7 @@ import TopicDescription from './_components/TopicDescription';
 import SelectOption from './_components/SelectOption';
 import { useContext } from 'react';
 import { UserInputContext } from '../_context/UserInputContext';
-import { GenerateCourseLayout_AI, normalizeCourseOutput } from '@/configs/AiModel'; // ✅ UPDATED
+import { GenerateCourseLayout_AI, normalizeCourseOutput } from '@/configs/AiModel';
 import LoadingDialog from './_components/LoadingDialog';
 import { db } from '@/configs/db';
 import { CourseList } from '@/configs/schema';
@@ -85,12 +85,12 @@ const GenerateCourseLayout=async()=>{
     const cleaned = result.replace(/```json|```/g, "");
     const parsed = JSON.parse(cleaned);
 
-    // 🔥 NEW: Normalize AI output (VERY IMPORTANT)
+    // Normalize AI output
     const normalized = normalizeCourseOutput(parsed);
 
     console.log("Normalized:", normalized);
 
-    SaveCourseLayoutInDb(normalized); // ✅ use normalized instead of parsed
+    await SaveCourseLayoutInDb(normalized);
     
 }catch (error) {
         console.error("ERROR:", error);
@@ -103,21 +103,26 @@ const GenerateCourseLayout=async()=>{
 const SaveCourseLayoutInDb=async(courseLayout)=>{
     var id = uuid4();
     setLoading(true);
-    const result=await db.insert(CourseList).values({
-        courseId:id,
-        name:userCourseInput?.topic,
-        level:userCourseInput?.level,
-        category:userCourseInput?.category,
-        courseOutput:courseLayout,
-        createdBy:user?.primaryEmailAddress?.emailAddress || 'Unknown',
-        userName:user?.fullName || 'Unknown',
-        userProfileImage:user?.imageUrl || ''
-    })
+    try{
+        await db.insert(CourseList).values({
+            courseId:id,
+            name:userCourseInput?.topic,
+            level:userCourseInput?.level,
+            category:userCourseInput?.category,
+            includeVideo:userCourseInput?.displayVideo||'Yes',
+            courseOutput:courseLayout,
+            createdBy:user?.primaryEmailAddress?.emailAddress || 'Unknown',
+            userName:user?.fullName || 'Unknown',
+            userProfileImage:user?.imageUrl || ''
+        });
 
-    console.log('Finish');
-    
-    setLoading(false);
-    router.replace('/create-course/'+id);
+        console.log('Finish');
+        window.location.href = '/create-course/'+id;
+    }catch(e){
+        console.log(e);
+    }finally{
+        setLoading(false);
+    }
 }
     return (
     <div>
