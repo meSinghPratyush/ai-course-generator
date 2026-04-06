@@ -12,7 +12,10 @@ import Link from 'next/link';
 
 function CourseCard({course,refreshData,displayUser=false}) {
 
+    const [visible, setVisible] = React.useState(true);
+
     const handleOnDelete=async()=>{
+        setVisible(false); // hide card instantly
         await db.delete(ChapterContent).where(eq(ChapterContent.courseId, course?.courseId))
         const resp=await db.delete(CourseList).where(eq(CourseList.id,course?.id))
         .returning({id:CourseList.id})
@@ -20,6 +23,9 @@ function CourseCard({course,refreshData,displayUser=false}) {
             refreshData();
         }
     }
+
+    if(!visible) return null;
+
   return (
     <div className='shadow-md rounded-lg border p-2 hover:scale-105 transition-all cursor-pointer mt-4'>
         <Link href={'/course/'+course?.courseId}>
