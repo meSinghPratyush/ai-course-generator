@@ -64,14 +64,21 @@ function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
                     <div className='prose max-w-none mt-2'>
                         <ReactMarkdown>{section?.explanation}</ReactMarkdown>
                     </div>
-                    {section?.code &&
-                        <div className='bg-gray-900 text-white p-5 rounded-lg mt-3 overflow-x-auto'>
-                            <h2 className='text-lg font-medium mb-3'>Code Example</h2>
-                            <div className='whitespace-pre-wrap break-words'
-                                dangerouslySetInnerHTML={{__html: section?.code}} />
-                        </div>
-                    }
-                </div>
+                        {section?.code &&
+                            <div className='bg-gray-900 text-white p-5 rounded-lg mt-3 overflow-x-auto'>
+                                <h2 className='text-lg font-medium mb-3'>Code Example</h2>
+                                <pre className='whitespace-pre-wrap break-words text-sm'>
+                                    <code>{section?.code
+                                        .replace(/<html>/gi, '')
+                                        .replace(/<\/html>/gi, '')
+                                        .replace(/<pre><code[^>]*>/gi, '')
+                                        .replace(/<\/code><\/pre>/gi, '')
+                                        .trim()
+                                    }</code>
+                                </pre>
+                            </div>
+                        }
+                    </div>
             ))}
         </div>
 
