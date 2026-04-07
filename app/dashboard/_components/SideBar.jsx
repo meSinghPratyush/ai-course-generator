@@ -86,45 +86,50 @@ function SideBar() {
   const path=usePathname()
 
   return (
-    <div className='fixed h-full md:w-64 p-5 shadow-md'>
-        <Link href={'/dashboard'}>
-            <Image src={'/logo.svg'} alt='Logo' width={140} height={40} />
-        </Link>
-        <hr className='my-5'/>
-
-        <ul>
-          {Menu.map((item,index)=>(
-            <li key={item.id}>
-              {item.name === 'Logout' ?
-                <div onClick={()=>setShowLogoutDialog(true)}
-                  className={`flex items-center gap-2 text-gray-600
-                  p-3 cursor-pointer hover:bg-gray-100 hover:text-black rounded-lg mb-2`}>
-                  <div className='text-2xl'>{item.icon}</div>
-                  <h2>{item.name}</h2>
-                </div>
-              :
-                <Link href={item.path}>
-                  <div className={`flex items-center gap-2 text-gray-600
-                  p-3 cursor-pointer hover:bg-gray-100 hover:text-black rounded-lg mb-2
-                  ${item.path===path&& 'bg-gray-200 text-black font-semibold'}`}>
-                    <div className='text-2xl'>{item.icon}</div>
-                    <h2>{item.name}</h2>
-                  </div>
-                </Link>
-              }
-            </li>  
-          ))}
-        </ul>
-
-        <div className='absolute bottom-10 w-[80%]'>
-          <div className='bg-purple-50 p-3 rounded-lg'>
-            <h2 className='text-sm font-medium'>Credits Remaining</h2>
-            <h2 className='text-2xl font-bold text-primary mt-1'>{userCredits}</h2>
-            <Progress value={(userCredits/15)*100} className='mt-2'/>
-            <Link href={'/dashboard/upgrade'}>
-              <h2 className='text-xs text-gray-500 mt-2 cursor-pointer hover:text-primary'>Buy more credits</h2>
+    <div className='fixed h-full md:w-64 shadow-md'>
+        {/* Logo area - matches header height */}
+        <div className='h-[70px] flex items-center px-5 border-b'>
+            <Link href={'/dashboard'}>
+                <Image src={'/logo.svg'} alt='Logo' width={200} height={55} className='object-contain'/>
             </Link>
-          </div>
+        </div>
+
+        {/* Rest of sidebar */}
+        <div className='p-5'>
+            <ul>
+              {Menu.map((item,index)=>(
+                <li key={item.id}>
+                  {item.name === 'Logout' ?
+                    <div onClick={()=>setShowLogoutDialog(true)}
+                      className={`flex items-center gap-2 text-gray-600
+                      p-3 cursor-pointer hover:bg-gray-100 hover:text-black rounded-lg mb-2`}>
+                      <div className='text-2xl'>{item.icon}</div>
+                      <h2>{item.name}</h2>
+                    </div>
+                  :
+                    <Link href={item.path}>
+                      <div className={`flex items-center gap-2 text-gray-600
+                      p-3 cursor-pointer hover:bg-gray-100 hover:text-black rounded-lg mb-2
+                      ${item.path===path&& 'bg-gray-200 text-black font-semibold'}`}>
+                        <div className='text-2xl'>{item.icon}</div>
+                        <h2>{item.name}</h2>
+                      </div>
+                    </Link>
+                  }
+                </li>  
+              ))}
+            </ul>
+
+            <div className='absolute bottom-10 w-[80%]'>
+              <div className='bg-purple-50 p-3 rounded-lg'>
+                <h2 className='text-sm font-medium'>Credits Remaining</h2>
+                <h2 className='text-2xl font-bold text-primary mt-1'>{userCredits}</h2>
+                <Progress value={(userCredits/15)*100} className='mt-2'/>
+                <Link href={'/dashboard/upgrade'}>
+                  <h2 className='text-xs text-gray-500 mt-2 cursor-pointer hover:text-primary'>Buy more credits</h2>
+                </Link>
+              </div>
+            </div>
         </div>
 
         <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

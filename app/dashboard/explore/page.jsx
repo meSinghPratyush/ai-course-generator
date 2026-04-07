@@ -27,6 +27,7 @@ function Explore() {
   const [showBuyDialog, setShowBuyDialog] = React.useState(false);
   const [showNoCreditsDialog, setShowNoCreditsDialog] = React.useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
 
   useEffect(()=>{
     GetAllCourse();
@@ -37,8 +38,10 @@ function Explore() {
   },[user])
 
   const GetAllCourse = async () => {
+    setLoading(true);
     const result = await db.select().from(CourseList).limit(9).offset(pageIndex*9);
     setCourseList(result);
+    setLoading(false);
   }
 
   const GetPurchasedCourses = async () => {
@@ -104,33 +107,39 @@ function Explore() {
       <h2 className='font-bold text-3xl'>Explore More Projects</h2>
       <p>Explore more projects build with AI by other users.</p>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5'>
-        {courseList?.map((course, index)=>(
-          <div key={index} className='relative'>
-            <CourseCard course={course} displayUser={true}/>
-            {isOwnCourse(course) ? (
-              <div className='mt-2'>
-                <Button className='w-full' variant='outline'
-                  onClick={()=>window.location.href='/course/'+course?.courseId}>
-                  View My Course
-                </Button>
-              </div>
-            ) : hasPurchased(course) ? (
-              <div className='mt-2'>
-                <Button className='w-full'
-                  onClick={()=>window.location.href='/course/'+course?.courseId}>
-                  Access Course
-                </Button>
-              </div>
-            ) : (
-              <div className='mt-2'>
-                <Button className='w-full' variant='outline'
-                  onClick={()=>onBuyClick(course)}>
-                  Buy Course - 1 Credit
-                </Button>
-              </div>
-            )}
-          </div>
-        ))}
+        {loading ?
+          [1,2,3,4,5,6].map((item, index)=>(
+            <div key={index} className='w-full mt-5 bg-slate-200 animate-pulse rounded-lg h-[270px]'></div>
+          ))
+        :
+          courseList?.map((course, index)=>(
+            <div key={index} className='relative'>
+              <CourseCard course={course} displayUser={true}/>
+              {isOwnCourse(course) ? (
+                <div className='mt-2'>
+                  <Button className='w-full' variant='outline'
+                    onClick={()=>window.location.href='/course/'+course?.courseId}>
+                    View My Course
+                  </Button>
+                </div>
+              ) : hasPurchased(course) ? (
+                <div className='mt-2'>
+                  <Button className='w-full'
+                    onClick={()=>window.location.href='/course/'+course?.courseId}>
+                    Access Course
+                  </Button>
+                </div>
+              ) : (
+                <div className='mt-2'>
+                  <Button className='w-full' variant='outline'
+                    onClick={()=>onBuyClick(course)}>
+                    Buy Course - 1 Credit
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))
+        }
       </div>
       <div className='flex justify-between mt-5'>
         {pageIndex!=0&&<Button onClick={()=>setPageIndex(pageIndex-1)}>Previous Page</Button>}

@@ -1,15 +1,24 @@
+"use client"
 import { UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import React from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 function Header() {
+  const path = usePathname();
+  const isDashboard = path?.startsWith('/dashboard');
+
   return (
-    <div className='flex justify-between items-center p-5 shadow-sm'>
-        <Link href={'/dashboard'}>
-            <Image src={'/favicon.svg'} alt='Logo' width={40} height={40} />
-        </Link>
-        <UserButton />
+    <div className='h-[70px] flex justify-between items-center px-5 shadow-sm'>
+        {!isDashboard &&
+            <Link href={'/dashboard'}>
+                <Image src={'/favicon.svg'} alt='Logo' width={120} height={35} className='object-contain'/>
+            </Link>
+        }
+        <div className={isDashboard ? 'ml-auto' : ''}>
+            <UserButton />
+        </div>
     </div>
   )
 }
