@@ -59,7 +59,7 @@ function CourseBasicInfo({course, refreshData, edit=true, showStart=false}) {
                   <img 
                     src={selectedFile ? selectedFile : (course?.courseBanner || '/online-lesson.png')} 
                     alt='lesson'
-                    className="w-full rounded-xl h-[250px] cursor-pointer object-cover" 
+                    className="w-full rounded-xl h-[250px] cursor-pointer object-contain" 
                   />
                   {edit && <input type="file" id="upload-image" className='opacity-0' onChange={onFileSelected}/>}
                 </label>
