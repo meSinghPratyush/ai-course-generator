@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import LoadingDialog from '../_components/LoadingDialog';
 import { GenerateChapterContent_AI } from '@/configs/AiModel';
 import service from '@/configs/service';
+import { toast } from 'sonner';
 
 
 function CourseLayout() {
@@ -101,11 +102,17 @@ function CourseLayout() {
             await db.update(User).set({ credits: currentCredits - 1 }).where(eq(User.email, user?.primaryEmailAddress?.emailAddress));
 
             setLoading(false);
+            toast.success('Course generated successfully!', {
+              description: 'All chapters and quizzes are ready.'
+            });
             router.replace('/create-course/'+course?.courseId+'/finish');
           }
 
         }catch(e){
           setLoading(false);
+          toast.error('Something went wrong while generating course.', {
+            description: 'Please try again.'
+          });
           console.log(e);
         }
         

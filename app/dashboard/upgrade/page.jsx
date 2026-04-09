@@ -5,6 +5,7 @@ import { db } from '@/configs/db'
 import { User } from '@/configs/schema'
 import { eq } from 'drizzle-orm'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 const Plans = [
     {
@@ -94,7 +95,9 @@ function Upgrade() {
                     const data = await verifyRes.json();
                     if (data.success) {
                         setUserCredits(data.newCredits);
-                        alert(`Payment successful! ${plan.credits} credits added to your account.`);
+                        toast.success(`${plan.credits} credits added to your account!`, {
+                            description: `Your new balance is ${data.newCredits} credits.`
+                        });
                     }
                 },
                 prefill: {
@@ -108,6 +111,7 @@ function Upgrade() {
             razor.open();
         } catch (error) {
             console.error(error);
+            toast.error('Payment failed. Please try again.');
         }
         setLoading(false);
     }

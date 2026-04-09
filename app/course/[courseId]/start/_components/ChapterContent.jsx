@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button'
 import QuizCard from './QuizCard'
 import { db } from '@/configs/db'
 import { UserQuizResult } from '@/configs/schema'
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
-function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
+function ChapterContent({chapter, content, onQuizPass, userEmail, courseId, onNextChapter, hasNextChapter}) {
 
     const [showQuiz, setShowQuiz] = React.useState(false);
     const [lastResult, setLastResult] = React.useState(null);
@@ -24,8 +24,10 @@ function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
                 eq(UserQuizResult.courseId, courseId),
                 eq(UserQuizResult.chapterIndex, content?.chapterIndex),
                 eq(UserQuizResult.userEmail, userEmail)
-            ));
-        if(result?.length > 0){
+            ))
+            .orderBy(desc(UserQuizResult.id))  
+            .limit(1);  
+        if(result?.length > 0 && result[0].score > 0){
             setLastResult(result[0]);
         } else {
             setLastResult(null);
@@ -105,6 +107,8 @@ function ChapterContent({chapter, content, onQuizPass, userEmail, courseId}) {
                         courseId={courseId}
                         userEmail={userEmail}
                         onQuizPass={onQuizPass}
+                        onNextChapter={onNextChapter}
+                        hasNextChapter={hasNextChapter}
                         onClose={()=>{setShowQuiz(false); GetLastResult();}}
                     />
                 }

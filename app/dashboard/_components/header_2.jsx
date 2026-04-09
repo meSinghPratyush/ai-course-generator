@@ -13,7 +13,7 @@ function Header() {
     <div className='h-[70px] flex justify-between items-center px-5 shadow-sm'>
         {!isDashboard &&
             <Link href={'/dashboard'}>
-                <Image src={'/favicon.svg'} alt='Logo' width={120} height={35} className='object-contain'/>
+                <Image src={'/favicon.svg'} alt='Logo' width={110} height={25} className='hover:opacity-80 transition-opacity duration-200 object-contain'/>
             </Link>
         }
         <div className={isDashboard ? 'ml-auto' : ''}>

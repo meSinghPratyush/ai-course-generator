@@ -7,7 +7,7 @@ import TopicDescription from './_components/TopicDescription';
 import SelectOption from './_components/SelectOption';
 import { useContext } from 'react';
 import { UserInputContext } from '../_context/UserInputContext';
-import { GenerateCourseLayout_AI, normalizeCourseOutput } from '@/configs/AiModel'; // ✅ UPDATED
+import { GenerateCourseLayout_AI, normalizeCourseOutput } from '@/configs/AiModel';
 import LoadingDialog from './_components/LoadingDialog';
 import { db } from '@/configs/db';
 import { CourseList } from '@/configs/schema';
@@ -15,6 +15,7 @@ import { Save } from 'lucide-react';
 import uuid4 from 'uuid4';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 
 function CreateCourse() {
@@ -85,16 +86,17 @@ const GenerateCourseLayout=async()=>{
     const cleaned = result.replace(/```json|```/g, "");
     const parsed = JSON.parse(cleaned);
 
-    // 🔥 NEW: Normalize AI output (VERY IMPORTANT)
+    // Normalize AI output
     const normalized = normalizeCourseOutput(parsed);
-
     console.log("Normalized:", normalized);
 
-    SaveCourseLayoutInDb(normalized); // ✅ use normalized instead of parsed
+    SaveCourseLayoutInDb(normalized);
     
 }catch (error) {
         console.error("ERROR:", error);
-        alert("Something went wrong while generating course");
+        toast.error('Something went wrong while generating course.', {
+            description: 'The AI service may be busy. Please try again in a moment.'
+        });
     } finally {
         setLoading(false);
     }

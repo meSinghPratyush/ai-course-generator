@@ -18,6 +18,7 @@ function CourseStart() {
 
     const [course,setCourse]=React.useState();
     const [selectedChapter,setSelectedChapter]=React.useState();
+    const [selectedChapterIndex,setSelectedChapterIndex]=React.useState(null);
     const [chapterContent,setChapterContent]=React.useState();
     const [unlockedChapters,setUnlockedChapters]=React.useState([0]);
     const [hasAccess,setHasAccess]=React.useState(false);
@@ -83,10 +84,31 @@ function CourseStart() {
         setUnlockedChapters(prev=>[...new Set([...prev, chapterIndex+1])]);
     }
 
+    // Navigate to next chapter
+    const onNextChapter=()=>{
+        const nextIndex = selectedChapterIndex + 1;
+        const chapters = course?.courseOutput?.chapters || [];
+        if(nextIndex < chapters.length){
+            const nextChapter = chapters[nextIndex];
+            setSelectedChapter(nextChapter);
+            setSelectedChapterIndex(nextIndex);
+            GetSelectedChapterContent(nextIndex);
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+    }
+
+    // A chapter is completed if the next chapter is unlocked
+    const isChapterCompleted = (index) => {
+        return unlockedChapters.includes(index + 1);
+    }
+
     // Block render until access is confirmed
     if(!hasAccess && course){
         return null;
     }
+
+    const chapters = course?.courseOutput?.chapters || [];
+    const hasNextChapter = selectedChapterIndex !== null && selectedChapterIndex < chapters.length - 1;
 
     const ChapterList = () => (
         <div>
@@ -108,12 +130,17 @@ function CourseStart() {
                         onClick={()=>{
                             if(unlockedChapters.includes(index)){
                                 setSelectedChapter(chapter);
+                                setSelectedChapterIndex(index);
                                 GetSelectedChapterContent(index);
                                 setMobileMenuOpen(false);
                             }
                         }}>
                         <div className='flex items-center justify-between pr-3'>
-                            <ChapterListCard chapter={chapter} index={index} />
+                            <ChapterListCard 
+                                chapter={chapter} 
+                                index={index}
+                                isCompleted={isChapterCompleted(index)}
+                            />
                             {!unlockedChapters.includes(index) && 
                                 <HiLockClosed className='text-gray-400 flex-none'/>
                             }
@@ -172,6 +199,8 @@ function CourseStart() {
                     onQuizPass={onQuizPass}
                     userEmail={user?.primaryEmailAddress?.emailAddress}
                     courseId={params?.courseId}
+                    onNextChapter={onNextChapter}
+                    hasNextChapter={hasNextChapter}
                 />
             }
         </div>

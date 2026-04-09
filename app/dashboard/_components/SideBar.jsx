@@ -60,9 +60,9 @@ function SideBar() {
     <div className='fixed h-full md:w-64 flex flex-col bg-white border-r border-gray-100 shadow-sm'>
 
       {/* Logo */}
-      <div className='px-6 pt-6 pb-4'>
+      <div className='px-4 h-[70px] flex items-center'>
         <Link href='/dashboard'>
-          <Image src='/logo.svg' alt='Logo' width={200} height={55} className='hover:opacity-80 transition-opacity duration-200 object-contain' />
+          <Image src='/logo.svg' alt='Logo' width={200} height={45} className='hover:opacity-80 transition-opacity duration-200 object-contain' />
         </Link>
       </div>
 

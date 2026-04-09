@@ -4,42 +4,75 @@ import { db } from '@/configs/db'
 import { UserQuizResult } from '@/configs/schema'
 import { and, eq } from 'drizzle-orm'
 
-function QuizCard({quiz, chapterIndex, courseId, userEmail, onQuizPass, onClose}) {
+function QuizCard({quiz, chapterIndex, courseId, userEmail, onQuizPass, onClose, onNextChapter, hasNextChapter}) {
 
     const [selectedAnswers, setSelectedAnswers] = React.useState({});
     const [submitted, setSubmitted] = React.useState(false);
     const [score, setScore] = React.useState(0);
+    const [showResult, setShowResult] = React.useState(false);
 
     const onSelectAnswer=(questionIndex, answer)=>{
         setSelectedAnswers(prev=>({...prev, [questionIndex]: answer}));
     }
 
-    const onSubmit=async()=>{
-        // calculate score
-        let correct = 0;
-        quiz.forEach((question, index)=>{
-            if(selectedAnswers[index] === question.correctAnswer){
-                correct++;
-            }
-        });
-        const finalScore = Math.round((correct/quiz.length)*100);
-        setScore(finalScore);
-        setSubmitted(true);
+const onSubmit = async () => {
+  // Calculate score
+  let correct = 0;
+  quiz.forEach((question, index) => {
+    if (selectedAnswers[index] === question.correctAnswer) {
+      correct++;
+    }
+  });
+  const finalScore = Math.round((correct / quiz.length) * 100);
+  const passed = finalScore >= 80;
 
-        const passed = finalScore >= 80;
+  // Wait for DB write to complete BEFORE doing anything else
+  await db.insert(UserQuizResult).values({
+    courseId: courseId,
+    chapterIndex: chapterIndex,
+    userEmail: userEmail,
+    score: finalScore,
+    passed: passed
+  });
 
-        // save to DB
-        await db.insert(UserQuizResult).values({
-            courseId: courseId,
-            chapterIndex: chapterIndex,
-            userEmail: userEmail,
-            score: finalScore,
-            passed: passed
-        });
+  setScore(finalScore);
+  setSubmitted(true);
+  setShowResult(true);
 
-        if(passed){
-            onQuizPass(chapterIndex);
-        }
+  // Call onQuizPass AFTER DB write so unlockedChapters updates correctly
+  if (passed) {
+    onQuizPass(chapterIndex);
+  }
+
+  
+};
+
+    // Show result card after submission (outside the quiz)
+    if(showResult) {
+        return (
+            <div className={`border rounded-xl p-6 mt-5 text-center ${score>=80 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <h2 className='text-4xl font-bold mb-2'>{score}%</h2>
+                {score>=80 ?
+                    <div>
+                        <p className='text-green-600 font-semibold text-lg mt-2'>Congratulations! You passed!</p>
+                        <p className='text-sm text-gray-500 mt-1'>Next chapter is now unlocked.</p>
+                        {hasNextChapter &&
+                            <Button className='mt-4 w-full' onClick={() => { onClose(); onNextChapter(); }}>
+                                Go to Next Chapter →
+                            </Button>
+                        }
+                    </div>
+                :
+                    <div>
+                        <p className='text-red-600 font-semibold text-lg mt-2'>You need 80% to pass.</p>
+                        <p className='text-sm text-gray-500 mt-1'>Review the chapter and try again.</p>
+                        <Button onClick={() => { setSubmitted(false); setSelectedAnswers({}); setShowResult(false); onClose(); }} className='mt-4 w-full'>
+                            Retry Quiz
+                        </Button>
+                    </div>
+                }
+            </div>
+        )
     }
 
     return (
@@ -65,33 +98,13 @@ function QuizCard({quiz, chapterIndex, courseId, userEmail, onQuizPass, onClose}
                 </div>
             ))}
 
-            {!submitted ?
+            {!submitted &&
                 <Button 
                     onClick={onSubmit} 
                     disabled={Object.keys(selectedAnswers).length !== quiz?.length}
                     className='w-full mt-4'>
                     Submit Quiz
                 </Button>
-            :
-                <div className={`text-center p-5 rounded-xl mt-4 ${score>=80 ? 'bg-green-50' : 'bg-red-50'}`}>
-                    <h2 className='text-2xl font-bold'>{score}%</h2>
-                    {score>=80 ?
-                        <div>
-                            <p className='text-green-600 font-medium mt-2'>🎉 Congratulations! You passed!</p>
-                            <p className='text-sm text-gray-500 mt-1'>Next chapter is now unlocked.</p>
-                        </div>
-                    :
-                        <div>
-                            <p className='text-red-600 font-medium mt-2'>❌ You need 80% to pass.</p>
-                            <Button onClick={()=>{setSubmitted(false); setSelectedAnswers({})}} className='mt-3'>
-                                Retry Quiz
-                            </Button>
-                        </div>
-                    }
-                    <Button variant='outline' onClick={onClose} className='mt-3 w-full'>
-                        Close Quiz
-                    </Button>
-                </div>
             }
         </div>
     )

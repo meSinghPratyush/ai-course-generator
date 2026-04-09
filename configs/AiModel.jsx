@@ -37,17 +37,20 @@ USER INPUT:
 ${prompt}
 `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: finalPrompt }],
-      },
-    ],
-  });
-
-  return response.text;
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: finalPrompt }],
+        },
+      ],
+    });
+    return response.text;
+  } catch (e) {
+    throw new Error("Gemini API error: " + e.message);
+  }
 };
 
 // Normalizer (NEW)
@@ -72,33 +75,37 @@ export const normalizeCourseOutput = (data) => {
 
 //  Chapter Content Generator
 export const GenerateChapterContent_AI = async (prompt) => {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: prompt }],
-      },
-    ],
-  });
-
-  const raw = response.text;
-  let cleaned = raw.replace(/```json|```/g, "").trim();
-
   try {
-    return JSON.parse(cleaned);
-  } catch (e) {
-    console.warn("JSON parse failed, retrying with stricter prompt...");
-    const retryResponse = await ai.models.generateContent({
+    const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
         {
           role: "user",
-          parts: [{ text: prompt + "\n\nCRITICAL: Return ONLY valid JSON. Escape all special characters inside string values properly." }],
+          parts: [{ text: prompt }],
         },
       ],
     });
-    const retryRaw = retryResponse.text.replace(/```json|```/g, "").trim();
-    return JSON.parse(retryRaw);
+
+    const raw = response.text;
+    let cleaned = raw.replace(/```json|```/g, "").trim();
+
+    try {
+      return JSON.parse(cleaned);
+    } catch (e) {
+      console.warn("JSON parse failed, retrying with stricter prompt...");
+      const retryResponse = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt + "\n\nCRITICAL: Return ONLY valid JSON. Escape all special characters inside string values properly." }],
+          },
+        ],
+      });
+      const retryRaw = retryResponse.text.replace(/```json|```/g, "").trim();
+      return JSON.parse(retryRaw);
+    }
+  } catch (e) {
+    throw new Error("Gemini API error: " + e.message);
   }
 };

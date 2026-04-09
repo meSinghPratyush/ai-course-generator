@@ -6,9 +6,9 @@ import Link from 'next/link';
 function Header() {
   return (
     <div className='flex justify-between p-5 shadow-md'>
-        <div className='h-[70px] flex items-center px-5'>
+        <div className='h-[70px] flex items-center px-4'>
             <Link href={'/dashboard'}>
-                <Image src={'/logo.svg'} alt='Logo' width={200} height={55} className='object-contain'/>
+                <Image src={'/logo.svg'} alt='Logo' width={200} height={45} className='hover:opacity-80 transition-opacity duration-200 object-contain'/>
             </Link>
         </div>
         <Link href={'/dashboard'}>
