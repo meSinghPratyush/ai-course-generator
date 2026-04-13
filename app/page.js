@@ -7,7 +7,7 @@ export default function Home() {
   return (
   <div>
     {/*Header*/}
-    <Header />
+   
     {/*Hero Section*/}
     <Hero />
   </div>
