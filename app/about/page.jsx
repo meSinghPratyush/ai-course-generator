@@ -8,7 +8,7 @@ const members = [
     name: "Pratyush Kumar",
     email: "pratyush1555@gmail.com",
     roll: "2470237",
-    image: "/PratyushKumar.jpg",
+    image: "/PratyushKumar2.png",
     role: "Full Stack Developer",
   },
   {
