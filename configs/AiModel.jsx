@@ -1,10 +1,36 @@
 import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
 });
 
-//  AI Call Function
+const groq = new Groq({
+  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
+  dangerouslyAllowBrowser: true,
+});
+
+// ── Groq fallback: plain text response ──
+const groqGenerateText = async (prompt) => {
+  const response = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [{ role: "user", content: prompt }],
+  });
+  return response.choices[0].message.content;
+};
+
+// ── Groq fallback: JSON response ──
+const groqGenerateJSON = async (prompt) => {
+  const response = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [{ role: "user", content: prompt }],
+    response_format: { type: "json_object" },
+  });
+  const raw = response.choices[0].message.content;
+  return JSON.parse(raw.replace(/```json|```/g, "").trim());
+};
+
+// ── AI Call Function ──
 export const GenerateCourseLayout_AI = async (prompt) => {
   const finalPrompt = `
 Generate a course in STRICT JSON format.
@@ -37,23 +63,26 @@ USER INPUT:
 ${prompt}
 `;
 
+  // Try Gemini first
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: finalPrompt }],
-        },
-      ],
+      contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
     });
     return response.text;
-  } catch (e) {
-    throw new Error("Gemini API error: " + e.message);
+  } catch (geminiError) {
+    console.warn("Gemini failed, switching to Groq...", geminiError.message);
+  }
+
+  // Fallback to Groq
+  try {
+    return await groqGenerateText(finalPrompt);
+  } catch (groqError) {
+    throw new Error("Both Gemini and Groq failed: " + groqError.message);
   }
 };
 
-// Normalizer (NEW)
+// ── Normalizer ──
 export const normalizeCourseOutput = (data) => {
   return {
     course_name: data.course_name || data["Course Name"] || "",
@@ -61,29 +90,22 @@ export const normalizeCourseOutput = (data) => {
     duration: data.duration || data["Duration"] || "",
     level: data.level || data["Level"] || "",
     category: data.category || data["Category"] || "",
-
     chapters: (data.chapters || data.Chapters || []).map((ch) => ({
-      chapter_name:
-        ch.chapter_name || ch["Chapter Name"] || ch.title || "",
-      about:
-        ch.about || ch["About"] || ch.description || "",
-      duration:
-        ch.duration || ch["Duration"] || "1 hour",
+      chapter_name: ch.chapter_name || ch["Chapter Name"] || ch.title || "",
+      about: ch.about || ch["About"] || ch.description || "",
+      duration: ch.duration || ch["Duration"] || "1 hour",
     })),
   };
 };
 
-//  Chapter Content Generator
+// ── Chapter Content Generator ──
 export const GenerateChapterContent_AI = async (prompt) => {
+
+  // Try Gemini first
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }],
-        },
-      ],
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
     const raw = response.text;
@@ -92,20 +114,27 @@ export const GenerateChapterContent_AI = async (prompt) => {
     try {
       return JSON.parse(cleaned);
     } catch (e) {
-      console.warn("JSON parse failed, retrying with stricter prompt...");
+      console.warn("JSON parse failed, retrying Gemini with stricter prompt...");
       const retryResponse = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: prompt + "\n\nCRITICAL: Return ONLY valid JSON. Escape all special characters inside string values properly." }],
-          },
-        ],
+        contents: [{
+          role: "user",
+          parts: [{ text: prompt + "\n\nCRITICAL: Return ONLY valid JSON. Escape all special characters inside string values properly." }],
+        }],
       });
       const retryRaw = retryResponse.text.replace(/```json|```/g, "").trim();
       return JSON.parse(retryRaw);
     }
-  } catch (e) {
-    throw new Error("Gemini API error: " + e.message);
+  } catch (geminiError) {
+    console.warn("Gemini failed for chapter content, switching to Groq...", geminiError.message);
+  }
+
+  // Fallback to Groq
+  try {
+    return await groqGenerateJSON(
+      prompt + "\n\nCRITICAL: Return ONLY valid JSON. No markdown, no explanation."
+    );
+  } catch (groqError) {
+    throw new Error("Both Gemini and Groq failed: " + groqError.message);
   }
 };
