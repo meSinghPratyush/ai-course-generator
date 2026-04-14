@@ -7,14 +7,18 @@ import { db } from '@/configs/db';
 import { CourseList, ChapterContent } from '@/configs/schema';
 import { eq } from 'drizzle-orm';
 import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
 
 function CourseCard({ course, refreshData, displayUser = false }) {
   const [visible, setVisible] = React.useState(true);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const { user } = useUser();
+
+  const isOwner = course?.createdBy === user?.primaryEmailAddress?.emailAddress;
 
   const handleOnDelete = async () => {
     setIsDeleting(true);
-    setTimeout(() => setVisible(false), 300); // let fade-out animate first
+    setTimeout(() => setVisible(false), 300);
     await db.delete(ChapterContent).where(eq(ChapterContent.courseId, course?.courseId));
     const resp = await db.delete(CourseList).where(eq(CourseList.id, course?.id))
       .returning({ id: CourseList.id });
@@ -31,9 +35,9 @@ function CourseCard({ course, refreshData, displayUser = false }) {
     'Advanced': 'bg-rose-50 text-rose-600 border border-rose-200',
   };
 
-const rawLevel = course?.courseOutput?.level;
-const level = rawLevel?.toLowerCase().startsWith('advance') ? 'Advanced' : rawLevel;
-const levelClass = levelColor[level] || 'bg-purple-50 text-purple-600 border border-purple-200';
+  const rawLevel = course?.courseOutput?.level;
+  const level = rawLevel?.toLowerCase().startsWith('advance') ? 'Advanced' : rawLevel;
+  const levelClass = levelColor[level] || 'bg-purple-50 text-purple-600 border border-purple-200';
 
   return (
     <div
@@ -52,7 +56,6 @@ const levelClass = levelColor[level] || 'bg-purple-50 text-purple-600 border bor
             alt={course?.name}
             className='object-cover transition-transform duration-500 ease-out group-hover:scale-105'
           />
-          {/* Subtle overlay on hover */}
           <div className='absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
         </div>
       </Link>
@@ -69,7 +72,8 @@ const levelClass = levelColor[level] || 'bg-purple-50 text-purple-600 border bor
               {course?.courseOutput?.course_name}
             </h2>
           </Link>
-          {!displayUser && (
+          {/* Only show delete menu if user is the owner */}
+          {isOwner && (
             <DropdownOption handleOnDelete={handleOnDelete}>
               <button className='p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-150 flex-none mt-0.5'>
                 <HiDotsVertical size={16} />

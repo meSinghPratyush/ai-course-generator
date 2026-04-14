@@ -39,7 +39,9 @@ function Explore() {
 
   const GetAllCourse = async () => {
     setLoading(true);
-    const result = await db.select().from(CourseList).limit(9).offset(pageIndex*9);
+    const result = await db.select().from(CourseList)
+      .where(eq(CourseList.publish, true))
+      .limit(9).offset(pageIndex*9);
     setCourseList(result);
     setLoading(false);
   }
