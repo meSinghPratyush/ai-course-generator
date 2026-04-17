@@ -14,8 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "LearnSphere",
+  title: "Learn Sphere",
   description: "A platform for learning and sharing knowledge.",
+  icons: {
+    icon: "/TabBar.svg",
+    apple: "/TabBar.svg",       // for Apple devices
+    shortcut: "/TabBar.svg",    // for browser shortcuts
+  },
 };
 
 export default function RootLayout({ children }) {
