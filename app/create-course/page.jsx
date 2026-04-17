@@ -27,7 +27,7 @@ function CreateCourse() {
     const { userCourseInput, setUserCourseInput } = useContext(UserInputContext);
     const [loading, setLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-    const [allowed, setAllowed] = useState(false);  // 👈 credit gate
+    const [allowed, setAllowed] = useState(false);  // credit gate
     const { user } = useUser();
     const router = useRouter();
 
@@ -44,7 +44,7 @@ function CreateCourse() {
             toast.error("You don't have enough credits!", {
                 description: "Please upgrade your plan to create a course."
             });
-            router.replace('/dashboard/upgrade'); // 👈 can't hit back to bypass
+            router.replace('/dashboard/upgrade'); // can't hit back to bypass
         } else {
             setAllowed(true);
         }
@@ -108,7 +108,7 @@ function CreateCourse() {
         router.replace('/create-course/' + id);
     };
 
-    // 👇 Blank screen while checking credits — prevents flash of content
+    //  Blank screen while checking credits — prevents flash of content
     if (!allowed) return null;
 
     return (
