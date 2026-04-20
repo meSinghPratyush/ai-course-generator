@@ -9,7 +9,7 @@ import { UserCourseListContext } from '@/app/_context/UserCourseListContext'
 import { HiOutlineBookOpen } from 'react-icons/hi2'
 import Link from 'next/link'
 
-function UserCourseList() {
+function UserCourseList({ searchQuery = '' }) {  // 👈 accept prop
   
   const [courseList, setCourseList] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -22,31 +22,38 @@ function UserCourseList() {
 
   const getUserCourses = async () => {
     setLoading(true);
-    // Get courses created by user
     const created = await db.select().from(CourseList)
       .where(eq(CourseList.createdBy, user?.primaryEmailAddress?.emailAddress));
 
-    // Get courses purchased by user
     const purchases = await db.select().from(CoursePurchase)
       .where(eq(CoursePurchase.buyerEmail, user?.primaryEmailAddress?.emailAddress));
 
-    // Fetch full course details for each purchased course
     const purchasedCourses = await Promise.all(
       purchases.map(p => 
         db.select().from(CourseList).where(eq(CourseList.courseId, p.courseId))
       )
     );
 
-    // Flatten and merge, avoid duplicates
     const purchasedList = purchasedCourses.flat();
     const allCourseIds = new Set(created.map(c => c.courseId));
     const uniquePurchased = purchasedList.filter(c => !allCourseIds.has(c.courseId));
 
     const combined = [...created, ...uniquePurchased];
     setCourseList(combined);
-    setUserCourseList(created); // context only tracks created courses for credit limit
+    setUserCourseList(created);
     setLoading(false);
   }
+
+  // 👇 filter locally against search query
+  const filteredCourses = courseList.filter(course => {
+    const q = searchQuery.toLowerCase();
+    if (!q) return true;
+    return (
+      course?.courseOutput?.course_name?.toLowerCase().includes(q) ||
+      course?.category?.toLowerCase().includes(q) ||
+      course?.level?.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className='mt-10'>
@@ -56,10 +63,15 @@ function UserCourseList() {
           [1,2,3,4,5].map((item, index) => (
             <div key={index} className='w-full mt-5 bg-slate-200 animate-pulse rounded-lg h-[270px]'></div>
           ))
-        ) : courseList?.length > 0 ? (
-          courseList?.map((course, index) => (
+        ) : filteredCourses?.length > 0 ? (  // 👈 filteredCourses instead of courseList
+          filteredCourses?.map((course, index) => (
             <CourseCard course={course} key={index} refreshData={()=>getUserCourses()} />
           ))
+        ) : courseList?.length > 0 ? (  // 👈 has courses but no search match
+          <div className='col-span-full flex flex-col items-center justify-center py-20 text-center'>
+            <h3 className='font-semibold text-lg text-gray-700'>No courses found for "<span className='text-purple-500'>{searchQuery}</span>"</h3>
+            <p className='text-gray-400 text-sm mt-1'>Try a different keyword.</p>
+          </div>
         ) : (
           <div className='col-span-full flex flex-col items-center justify-center py-20 text-center'>
             <div className='bg-purple-50 p-6 rounded-full mb-4'>
